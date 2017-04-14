@@ -18,7 +18,7 @@ A simple script for uploading Toggl entries into a Google calendar.
 3. Cope the client_secret.json file to the folder with the script
 4. run python3 toggl-to-gcal.py YYYY-MM-DD to copy the entriens from Toggl to Google Calendar
 
-## Edit by livekn
+## Edited by livekn
 
 1. use config.py
 2. remove client
