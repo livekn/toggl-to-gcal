@@ -17,16 +17,31 @@ Requirements
    - https://developers.google.com/google-apps/calendar/quickstart/python#prerequisites
    - you need the client_secret.json file
 
-1. Set the timezone in toggl-to-gcal.py
+1. Set the timezone in config.py
 2. Enter the Toggl token and Calendar address
 3. Cope the client_secret.json file to the folder with the script
 4. run python3 toggl-to-gcal.py YYYY-MM-DD to copy the entriens from Toggl to Google Calendar
 
 Tomas Barton, tommz9@gmail.com
+
+---
+
+Add by livekn
+
+config.py demo:
+
+class config(object):
+	timezone = '+08'
+	api_token = 'FILL HERE'
+	calendar_id = 'FILL HERE'
+
 '''
 import requests
 from requests.auth import HTTPBasicAuth
 from urllib.parse import urlencode
+
+import config as c
+config = c.config()
 
 import pickle
 
@@ -37,13 +52,13 @@ import sys
 
 from gpush import push_entries
 
-timezone = '-07'
+timezone = config.timezone
 
 # Toggl
-api_token = 'FILL HERE'
+api_token = config.api_token
 
 # Google calendar
-calendar_id = 'FILL HERE'
+calendar_id = config.calendar_id
 
 
 def get_project_details(pid):
@@ -53,16 +68,6 @@ def get_project_details(pid):
     r = requests.get(url, headers=headers,
                      auth=HTTPBasicAuth(api_token, 'api_token'))
     return r.json()['data']
-
-
-def get_client_details(cid):
-    url = 'https://www.toggl.com/api/v8/clients/{}'.format(cid)
-    headers = {'content-type': 'application/json'}
-    print('getting client from toggl')
-    r = requests.get(url, headers=headers,
-                     auth=HTTPBasicAuth(api_token, 'api_token'))
-    return r.json()['data']
-
 
 def get_entries(day):
     '''
@@ -87,10 +92,16 @@ def get_entries(day):
                      auth=HTTPBasicAuth(api_token, 'api_token'))
     return r.json()
 
+    '''
+    return demo:
+    {'wid': 1234567, 'stop': '2017-04-13T09:42:29+00:00', 'duronly': False, 'id': 123456789, 'at': '2017-04-13T09:42:37+00:00', 'start': '2017-04-13T
+09:24:52+00:00', 'uid': 1234567, 'pid': 12345678, 'duration': 1057, 'description': 'Hello World', 'billable': False}
+    '''
+
 
 class Cache:
-    ''' Cache for client and project details. To avoid multiple queries to
-    API of Toggle while translating the client and project id to name.
+    ''' Cache for project details. To avoid multiple queries to
+    API of Toggle while translating the project id to name.
 
     Can be serialized to file and used in the following runs
     '''
@@ -102,20 +113,10 @@ class Cache:
         # try to load the cache from a file
         try:
             with open(file, 'rb') as f:
-                self.projects, self.clients = pickle.load(f)
+                self.projects = pickle.load(f)
         except (FileNotFoundError, pickle.PickleError):
             # Just reset the cache
             self.projects = {}
-            self.clients = {}
-
-    def get_client(self, cid):
-        try:
-            client = self.clients[cid]
-        except KeyError:
-            client = get_client_details(cid)
-            self.clients[cid] = client
-
-        return client
 
     def get_project(self, pid):
         try:
@@ -128,7 +129,7 @@ class Cache:
 
     def serialize(self):
         with open(self.cache_file, 'wb') as f:
-            pickle.dump((self.projects, self.clients), f)
+            pickle.dump((self.projects), f)
 
 
 def decode_entries(entries, cache):
@@ -148,11 +149,11 @@ def decode_entries(entries, cache):
         except KeyError:
             e['description'] = ''
 
-        project = cache.get_project(entry['pid'])
-        client = cache.get_client(project['cid'])
-
-        e['project'] = project['name']
-        e['client'] = client['name']
+        if entry.get('pid'):
+             project = cache.get_project(entry['pid'])
+             e['project'] = project['name']
+        else:
+            e['project'] = ""
 
         decoded.append(e)
     return decoded

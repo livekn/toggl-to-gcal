@@ -13,7 +13,21 @@ A simple script for uploading Toggl entries into a Google calendar.
   - https://developers.google.com/google-apps/calendar/quickstart/python#prerequisites
   - you need the client_secret.json file
 
-1. Set the timezone in toggl-to-gcal.py
+1. Set the timezone in config.py
 2. Enter the Toggl token and Calendar address
 3. Cope the client_secret.json file to the folder with the script
 4. run python3 toggl-to-gcal.py YYYY-MM-DD to copy the entriens from Toggl to Google Calendar
+
+## Edit by livekn
+
+1. use config.py
+2. remove client
+
+config.py demo:
+
+```python
+class config(object):
+	timezone = '+08'
+	api_token = 'FILL HERE'
+	calendar_id = 'FILL HERE'
+```

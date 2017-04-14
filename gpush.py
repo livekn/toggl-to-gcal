@@ -20,6 +20,9 @@ from oauth2client import tools
 import googleapiclient.errors
 import datetime
 
+import config as c
+config = c.config()
+
 import argparse
 
 SCOPES = 'https://www.googleapis.com/auth/calendar'
@@ -52,8 +55,8 @@ def get_credentials():
 
 def entry_to_event(entry):
     event = {
-        'summary': entry['client'] + ' - ' + entry['project'],
-        'description': entry['description'],
+        'summary': entry['description'] + ' - ' + entry['project'],
+        'description': 'duration: ' + str(entry['duration']),
         'id': entry['id'],
         'start': {
             'dateTime': entry['start']
@@ -77,7 +80,7 @@ def push_entries(entries, calendar_id):
 
     for entry in entries:
         event = entry_to_event(entry)
-
+        print(event)
         try:
             event = service.events().insert(calendarId=calendar_id, body=event).execute()
             print('Event created: {}'.format(event.get('htmlLink')))
@@ -87,19 +90,17 @@ def push_entries(entries, calendar_id):
 
 if __name__ == '__main__':
     test_data = [
-        {'client': 'Bluebox',
-         'description': 'sensors',
+        {'description': 'sensors',
          'duration': 13686,
          'id': 356980409,
          'project': 'Others',
-         'start': '2016-03-26T13:49:24+00:00',
-         'stop': '2016-03-26T17:37:30+00:00'},
-        {'client': 'Working out',
-         'description': '',
+         'start': '2017-04-16T13:49:24+00:00',
+         'stop': '2017-04-16T17:37:30+00:00'},
+        {'description': '',
          'duration': 6974,
          'id': 357027440,
          'project': 'Climbing',
-         'start': '2016-03-26T22:00:35+00:00',
-         'stop': '2016-03-26T23:56:49+00:00'}]
+         'start': '2017-04-16T22:00:35+00:00',
+         'stop': '2017-04-16T23:56:49+00:00'}]
 
-    push_entries(test_data)
+    push_entries(test_data, config.calendar_id)

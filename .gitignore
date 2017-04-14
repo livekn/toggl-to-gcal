@@ -1,6 +1,7 @@
 client_secret.json
 cache
 calendar-credential.json
+config.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
